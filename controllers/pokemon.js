@@ -16,7 +16,7 @@ exports.listaPokemon = async (req, res) => {
 exports.pkmnByName = async (req, res) => {
   const { nombre } = req.params;
   const { rows } = await client.query(
-    "SELECT * FROM pokedex.lista_pokemons WHERE nombre=$1",
+    "SELECT * FROM pokedex.lista_pokemons WHERE lower(nombre)=$1",
     [nombre.toLowerCase()]
   );
   if (rows.length === 0) {
