@@ -19,10 +19,18 @@ exports.pkmnByName = async (req, res) => {
     "SELECT * FROM pokedex.lista_pokemons WHERE lower(nombre)=$1",
     [nombre.toLowerCase()]
   );
+  const { rows: next } = await client.query(
+    "SELECT nombre FROM pokedex.lista_pokemons WHERE lower(nombre)>$1 ORDER BY nombre ASC limit 1",
+    [nombre.toLowerCase()]
+  );
+  const { rows: prev } = await client.query(
+    "SELECT nombre FROM pokedex.lista_pokemons WHERE lower(nombre)<$1 ORDER BY nombre DESC limit 1",
+    [nombre.toLowerCase()]
+  );
   if (rows.length === 0) {
     res.sendStatus(404);
   } else {
-    res.send(rows[0]);
+    res.send({ pokemon: rows[0], next: next[0], prev: prev[0] });
   }
 };
 
