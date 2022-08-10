@@ -10,8 +10,7 @@ const client = new Pool({
 });
 
 exports.listaUsuarios = async (req, res) => {
-  const { rows } = await client.query("SELECT * FROM pokedex.usuarios");
-
+  const { rows } = await client.query("SELECT * FROM pokedex.users_list");
   return res.send(rows);
 };
 
@@ -20,21 +19,25 @@ exports.agregarUsuario = async (req, res) => {
   const password = await bcrypt.hash(req.body.password, salt);
 
   const newUser = {
-    nombre: req.body.nombre,
+    username: req.body.username,
     mail: req.body.mail,
     password: password,
   };
   await client.query(
-    "INSERT INTO pokedex.usuarios (nombre, mail, password) VALUES ($1, $2, $3)",
-    [newUser.nombre, newUser.mail, newUser.password]
+    "INSERT INTO pokedex.users_list (username, password) VALUES ($1, $2)",
+    [newUser.username, newUser.password]
   );
+  await client.query("INSERT INTO pokedex.mails_list (mail) VALUES ($1)", [
+    newUser.mail,
+  ]);
+
   return res.json({ success: true, newUser });
 };
 
 exports.loginUsuario = async (req, res) => {
   const { rows } = await client.query(
-    "SELECT * FROM pokedex.usuarios WHERE mail=$1",
-    [req.body.mail]
+    "SELECT * FROM pokedex.users_list WHERE username=$1",
+    [req.body.username]
   );
   if (!rows[0]) {
     return res.status(400).json({ error: "Usuario no encontrado" });
